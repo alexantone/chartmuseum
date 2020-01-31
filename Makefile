@@ -5,6 +5,7 @@ REVISION := $(shell git rev-parse --short HEAD;)
 # MOD_PROXY_URL ?= "https://gocenter.io"
 
 CM_LOADTESTING_HOST ?= http://localhost:8080
+ARCH=arm64
 
 .PHONY: bootstrap
 bootstrap: export GO111MODULE=on
@@ -16,21 +17,21 @@ bootstrap:
 build: build-linux build-mac build-windows
 
 build-windows: export GOOS=windows
-build-windows: export GOARCH=amd64
+build-windows: export GOARCH=$(ARCH)
 build-windows: export GO111MODULE=on
 build-windows: export GOPROXY=$(MOD_PROXY_URL)
 build-windows:
 	go build -v --ldflags="-w -X main.Version=$(VERSION) -X main.Revision=$(REVISION)" \
-		-o bin/windows/amd64/chartmuseum cmd/chartmuseum/main.go  # windows
+		-o bin/windows/$(ARCH)/chartmuseum cmd/chartmuseum/main.go  # windows
 
 build-linux: export GOOS=linux
-build-linux: export GOARCH=amd64
+build-linux: export GOARCH=$(ARCH)
 build-linux: export CGO_ENABLED=0
 build-linux: export GO111MODULE=on
 build-linux: export GOPROXY=$(MOD_PROXY_URL)
 build-linux:
 	go build -v --ldflags="-w -X main.Version=$(VERSION) -X main.Revision=$(REVISION)" \
-		-o bin/linux/amd64/chartmuseum cmd/chartmuseum/main.go  # linux
+		-o bin/linux/$(ARCH)/chartmuseum cmd/chartmuseum/main.go  # linux
 
 build-armv7: export GOOS=linux
 build-armv7: export GOARCH=arm
@@ -48,13 +49,13 @@ container-armv7:
 	docker build . -t chartmuseum:v$(VERSION) -f Dockerfile.arm
 
 build-mac: export GOOS=darwin
-build-mac: export GOARCH=amd64
+build-mac: export GOARCH=$(ARCH)
 build-mac: export CGO_ENABLED=0
 build-mac: export GO111MODULE=on
 build-mac: export GOPROXY=$(MOD_PROXY_URL)
 build-mac:
 	go build -v --ldflags="-w -X main.Version=$(VERSION) -X main.Revision=$(REVISION)" \
-		-o bin/darwin/amd64/chartmuseum cmd/chartmuseum/main.go # mac osx
+		-o bin/darwin/$(ARCH)/chartmuseum cmd/chartmuseum/main.go # mac osx
 
 .PHONY: clean
 clean:
@@ -87,7 +88,7 @@ acceptance: setup-test-environment
 .PHONY: run
 run:
 	@rm -rf .chartstorage/
-	@bin/darwin/amd64/chartmuseum --debug --port=8080 --storage="local" \
+	@bin/darwin/$(ARCH)/chartmuseum --debug --port=8080 --storage="local" \
 		--storage-local-rootdir=".chartstorage/"
 
 .PHONY: tree
