@@ -3,6 +3,7 @@ VERSION=0.8.2
 REVISION := $(shell git rev-parse --short HEAD;)
 
 CM_LOADTESTING_HOST ?= http://localhost:8080
+ARCH=arm64
 
 .PHONY: bootstrap
 bootstrap:
@@ -11,22 +12,22 @@ bootstrap:
 .PHONY: build
 build: build-linux build-mac build-windows
 
-build-windows: export GOARCH=amd64
+build-windows: export GOARCH=$(ARCH)
 build-windows:
 	@GOOS=windows go build -v --ldflags="-w -X main.Version=$(VERSION) -X main.Revision=$(REVISION)" \
-		-o bin/windows/amd64/chartmuseum cmd/chartmuseum/main.go  # windows
+		-o bin/windows/$(ARCH)/chartmuseum cmd/chartmuseum/main.go  # windows
 
-build-linux: export GOARCH=amd64
+build-linux: export GOARCH=$(ARCH)
 build-linux: export CGO_ENABLED=0
 build-linux:
 	@GOOS=linux go build -v --ldflags="-w -X main.Version=$(VERSION) -X main.Revision=$(REVISION)" \
-		-o bin/linux/amd64/chartmuseum cmd/chartmuseum/main.go  # linux
+		-o bin/linux/$(ARCH)/chartmuseum cmd/chartmuseum/main.go  # linux
 
-build-mac: export GOARCH=amd64
+build-mac: export GOARCH=$(ARCH)
 build-mac: export CGO_ENABLED=0
 build-mac:
 	@GOOS=darwin go build -v --ldflags="-w -X main.Version=$(VERSION) -X main.Revision=$(REVISION)" \
-		-o bin/darwin/amd64/chartmuseum cmd/chartmuseum/main.go # mac osx
+		-o bin/darwin/$(ARCH)/chartmuseum cmd/chartmuseum/main.go # mac osx
 
 .PHONY: clean
 clean:
@@ -56,7 +57,7 @@ acceptance: setup-test-environment
 .PHONY: run
 run:
 	@rm -rf .chartstorage/
-	@bin/darwin/amd64/chartmuseum --debug --port=8080 --storage="local" \
+	@bin/darwin/$(ARCH)/chartmuseum --debug --port=8080 --storage="local" \
 		--storage-local-rootdir=".chartstorage/"
 
 .PHONY: tree
